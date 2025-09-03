@@ -1,61 +1,67 @@
 " ===============================
-" Neovim init.vim para Go + Python
+" Neovim init.vim para Go + Python + Rust
 " ===============================
 
+" -------------------------
+" Configurações básicas
+" -------------------------
 set nocompatible
 set noswapfile
 set background=dark
 let mapleader = " "
 
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+" -------------------------
+" Vim-Plug setup
+" -------------------------
+call plug#begin('~/.vim/plugged')
 
-" -------------------
+" -------------------------
 " Gerenciador de Plugins
-" -------------------
-Plugin 'VundleVim/Vundle.vim'
-
-" Suporte para múltiplas linguagens
-Plugin 'sheerun/vim-polyglot'
+" -------------------------
+Plug 'junegunn/vim-plug'  " Vim-Plug, só para referência
+Plug 'sheerun/vim-polyglot'  " Suporte a múltiplas linguagens
 
 " LSP
-Plugin 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Go
-Plugin 'fatih/vim-go'
+Plug 'fatih/vim-go'
 
 " Python
-Plugin 'psf/black'
-Plugin 'vim-python/python-syntax'
+Plug 'psf/black'
+Plug 'vim-python/python-syntax'
+
+" Rust
+Plug 'rust-lang/rust.vim'
 
 " Análise estática
-Plugin 'dense-analysis/ale'
+Plug 'dense-analysis/ale'
 
 " Interface e navegação
-Plugin 'itchyny/lightline.vim'
-Plugin 'flazz/vim-colorschemes'
-Plugin 'sainnhe/gruvbox-material'
-Plugin 'preservim/nerdtree'
-Plugin 'majutsushi/tagbar'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'RRethy/vim-illuminate'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'junegunn/fzf.vim'
-Plugin 'terryma/vim-multiple-cursors'
+Plug 'itchyny/lightline.vim'
+Plug 'flazz/vim-colorschemes'
+Plug 'lunarvim/darkplus.nvim' " Tema darkflat-like
+Plug 'preservim/nerdtree'
+Plug 'majutsushi/tagbar'
+Plug 'jiangmiao/auto-pairs'
+Plug 'RRethy/vim-illuminate'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'terryma/vim-multiple-cursors'
 
-call vundle#end()
+call plug#end()
 filetype plugin indent on
 syntax enable
 
 " -------------------------
 " Tema
 " -------------------------
-let g:gruvbox_material_background = 'hard'
-let g:gruvbox_material_foreground = 'original'
-colorscheme gruvbox-material
+let g:gruvbox_contrast_dark = 'hard'   " opcional, pode ser 'soft' ou 'medium'
+let g:gruvbox_transparent_bg = 1       " ativa transparência para Gruvbox
+colorscheme gruvbox
 
-" Transparência (funciona em terminal que suporta)
+" Transparência
 hi Normal guibg=NONE ctermbg=NONE
 
 " -------------------------
@@ -73,59 +79,72 @@ set laststatus=2
 set undodir=~/.vim/undodir
 set undofile
 
-" Python Highlight
 let python_highlight_all=1
 
 " -------------------------
 " Atalhos gerais
 " -------------------------
-map <C-e> :Ex<CR>
-map <C-c> :close<CR>
-map dnn :NERDTreeToggle<CR>
-map drr :NERDTreeRefreshRoot<CR>
-map dtt :TagbarOpen<CR>
-map dtc :TagbarClose<CR>
-map dff :Files<CR>
-map drg :Rg<CR>
+" Navegação e NERDTree
+nnoremap <C-e> :Ex<CR>
+nnoremap <C-c> :close<CR>
+nnoremap <leader>n :NERDTreeToggle<CR>
+nnoremap <leader>r :NERDTreeRefreshRoot<CR>
+nnoremap <leader>t :TagbarToggle<CR>
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>g :Rg<CR>
 
 " Navegação entre janelas
-nmap <leader>h :wincmd h<CR>
-nmap <leader>j :wincmd j<CR>
-nmap <leader>k :wincmd k<CR>
-nmap <leader>l :wincmd l<CR>
+nnoremap <leader>h <C-w>h
+nnoremap <leader>j <C-w>j
+nnoremap <leader>k <C-w>k
+nnoremap <leader>l <C-w>l
 
 " -------------------------
-" ALE para Python e Go
+" ALE para Python, Go e Rust
 " -------------------------
 let g:ale_linters = {
 \ 'python': ['flake8', 'pylint'],
-\ 'go': ['gofmt', 'golint', 'gopls']
+\ 'go': ['gofmt', 'golint', 'gopls'],
+\ 'rust': ['rls', 'cargo']
 \}
 let g:ale_fixers = {
 \ '*': ['remove_trailing_lines', 'trim_whitespace'],
 \ 'python': ['black'],
-\ 'go': ['gofmt']
+\ 'go': ['gofmt'],
+\ 'rust': ['rustfmt']
 \}
 let g:ale_fix_on_save = 1
 
 " -------------------------
 " Configuração Coc.nvim
 " -------------------------
-" Atalhos essenciais
+" Atualiza sugestões manualmente
 inoremap <silent><expr> <C-Space> coc#refresh()
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gD <Plug>(coc-declaration)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-nmap <silent> K :call CocActionAsync('doHover')<CR>
-nmap <leader>rn <Plug>(coc-rename)
-nmap <leader>f  :call CocAction('format')<CR>
-xmap <leader>f  :call CocAction('format')<CR>
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-nmap <leader>q :CocFix<CR>
-autocmd FileType go nmap <leader>oi :CocCommand go.import.organize<CR>
-nmap <leader>e :CocList diagnostics<CR>
+
+" Tab confirma sugestão
+inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "\<Tab>"
+
+" Navegação entre sugestões com Ctrl+n / Ctrl+p
+inoremap <expr> <C-n> pumvisible() ? "\<C-n>" : "\<C-n>"
+inoremap <expr> <C-p> pumvisible() ? "\<C-p>" : "\<C-p>"
+
+" Shift+Tab não faz nada (não mapeado)
+
+" Navegação e ações com Coc
+nnoremap <silent> gd <Plug>(coc-definition)
+nnoremap <silent> gD <Plug>(coc-declaration)
+nnoremap <silent> gi <Plug>(coc-implementation)
+nnoremap <silent> gr <Plug>(coc-references)
+nnoremap <silent> K :call CocActionAsync('doHover')<CR>
+nnoremap <leader>rn <Plug>(coc-rename)
+nnoremap <leader>f  :call CocAction('format')<CR>
+xnoremap <leader>f  :call CocAction('format')<CR>
+nnoremap <silent> [g <Plug>(coc-diagnostic-prev)
+nnoremap <silent> ]g <Plug>(coc-diagnostic-next)
+nnoremap <leader>q :CocFix<CR>
+autocmd FileType go nnoremap <leader>oi :CocCommand go.import.organize<CR>
+nnoremap <leader>e :CocList diagnostics<CR>
+
 
 " -------------------------
 " Vim-Go Config
@@ -137,8 +156,8 @@ let g:go_auto_type_info = 1
 " -------------------------
 " Comandos Python
 " -------------------------
-autocmd FileType python map <buffer> <F9> :w<CR>:!python3 %<CR>
-autocmd FileType python imap <buffer> <F9> <esc>:w<CR>:!python3 %<CR>
+autocmd FileType python nnoremap <buffer> <F9> :w<CR>:!python3 %<CR>
+autocmd FileType python inoremap <buffer> <F9> <esc>:w<CR>:!python3 %<CR>
 
 " -------------------------
 " Indent Guides

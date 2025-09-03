@@ -1,5 +1,5 @@
 " ===============================
-" Neovim init.vim para Go + Python + Rust
+" Neovim init.vim para Go + Python + Rust + JS + HTML
 " ===============================
 
 " -------------------------
@@ -18,11 +18,9 @@ call plug#begin('~/.vim/plugged')
 " -------------------------
 " Gerenciador de Plugins
 " -------------------------
-Plug 'junegunn/vim-plug'  " Vim-Plug, só para referência
-Plug 'sheerun/vim-polyglot'  " Suporte a múltiplas linguagens
-
-" LSP
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'junegunn/vim-plug'            " Vim-Plug (referência)
+Plug 'sheerun/vim-polyglot'         " Suporte a múltiplas linguagens
+Plug 'neoclide/coc.nvim', {'branch': 'release'}  " LSP + Autocomplete
 
 " Go
 Plug 'fatih/vim-go'
@@ -34,13 +32,20 @@ Plug 'vim-python/python-syntax'
 " Rust
 Plug 'rust-lang/rust.vim'
 
+" JavaScript / TypeScript / HTML / Web Dev
+Plug 'pangloss/vim-javascript'
+Plug 'maxmellon/vim-jsx-pretty'     " JSX/TSX highlight
+Plug 'yuezk/vim-js'                 " Melhor suporte para JS
+Plug 'othree/html5.vim'             " HTML5 support
+Plug 'mattn/emmet-vim'              " Expansões emmet
+
 " Análise estática
 Plug 'dense-analysis/ale'
 
 " Interface e navegação
 Plug 'itchyny/lightline.vim'
 Plug 'flazz/vim-colorschemes'
-Plug 'lunarvim/darkplus.nvim' " Tema darkflat-like
+Plug 'lunarvim/darkplus.nvim'
 Plug 'preservim/nerdtree'
 Plug 'majutsushi/tagbar'
 Plug 'jiangmiao/auto-pairs'
@@ -57,11 +62,9 @@ syntax enable
 " -------------------------
 " Tema
 " -------------------------
-let g:gruvbox_contrast_dark = 'hard'   " opcional, pode ser 'soft' ou 'medium'
-let g:gruvbox_transparent_bg = 1       " ativa transparência para Gruvbox
+let g:gruvbox_contrast_dark = 'hard'
+let g:gruvbox_transparent_bg = 1
 colorscheme gruvbox
-
-" Transparência
 hi Normal guibg=NONE ctermbg=NONE
 
 " -------------------------
@@ -78,13 +81,11 @@ set colorcolumn=80
 set laststatus=2
 set undodir=~/.vim/undodir
 set undofile
-
 let python_highlight_all=1
 
 " -------------------------
 " Atalhos gerais
 " -------------------------
-" Navegação e NERDTree
 nnoremap <C-e> :Ex<CR>
 nnoremap <C-c> :close<CR>
 nnoremap <leader>n :NERDTreeToggle<CR>
@@ -93,44 +94,39 @@ nnoremap <leader>t :TagbarToggle<CR>
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>g :Rg<CR>
 
-" Navegação entre janelas
 nnoremap <leader>h <C-w>h
 nnoremap <leader>j <C-w>j
 nnoremap <leader>k <C-w>k
 nnoremap <leader>l <C-w>l
 
 " -------------------------
-" ALE para Python, Go e Rust
+" ALE (Linters & Fixers)
 " -------------------------
 let g:ale_linters = {
 \ 'python': ['flake8', 'pylint'],
 \ 'go': ['gofmt', 'golint', 'gopls'],
-\ 'rust': ['rls', 'cargo']
+\ 'rust': ['rls', 'cargo'],
+\ 'javascript': ['eslint'],
+\ 'html': ['tidy']
 \}
 let g:ale_fixers = {
 \ '*': ['remove_trailing_lines', 'trim_whitespace'],
 \ 'python': ['black'],
 \ 'go': ['gofmt'],
-\ 'rust': ['rustfmt']
+\ 'rust': ['rustfmt'],
+\ 'javascript': ['eslint'],
+\ 'html': ['prettier']
 \}
 let g:ale_fix_on_save = 1
 
 " -------------------------
-" Configuração Coc.nvim
+" Coc.nvim Config
 " -------------------------
-" Atualiza sugestões manualmente
 inoremap <silent><expr> <C-Space> coc#refresh()
-
-" Tab confirma sugestão
 inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "\<Tab>"
-
-" Navegação entre sugestões com Ctrl+n / Ctrl+p
 inoremap <expr> <C-n> pumvisible() ? "\<C-n>" : "\<C-n>"
 inoremap <expr> <C-p> pumvisible() ? "\<C-p>" : "\<C-p>"
 
-" Shift+Tab não faz nada (não mapeado)
-
-" Navegação e ações com Coc
 nnoremap <silent> gd <Plug>(coc-definition)
 nnoremap <silent> gD <Plug>(coc-declaration)
 nnoremap <silent> gi <Plug>(coc-implementation)
@@ -145,7 +141,6 @@ nnoremap <leader>q :CocFix<CR>
 autocmd FileType go nnoremap <leader>oi :CocCommand go.import.organize<CR>
 nnoremap <leader>e :CocList diagnostics<CR>
 
-
 " -------------------------
 " Vim-Go Config
 " -------------------------
@@ -158,6 +153,12 @@ let g:go_auto_type_info = 1
 " -------------------------
 autocmd FileType python nnoremap <buffer> <F9> :w<CR>:!python3 %<CR>
 autocmd FileType python inoremap <buffer> <F9> <esc>:w<CR>:!python3 %<CR>
+
+" -------------------------
+" Emmet para HTML/JSX
+" -------------------------
+let g:user_emmet_leader_key='<C-z>'
+autocmd FileType html,css,javascript.jsx EmmetInstall
 
 " -------------------------
 " Indent Guides
